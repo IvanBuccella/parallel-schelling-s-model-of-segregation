@@ -1,0 +1,10 @@
+version: "3.7"
+services:
+  openmpi:
+    build:
+      context: ./docker/openmpi
+      dockerfile: Dockerfile.dev
+    volumes:
+      - "./src:/app"
+    command: >
+      sh -c "chmod +x run.sh && ./run.sh"
