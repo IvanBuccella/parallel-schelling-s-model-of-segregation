@@ -41,14 +41,19 @@ int main()
     initialize_agents();
     print_grid();
 
-    int i, unsatisfied_agents = 0, round = 0;
-    for (i = 0; i < num_agents && round < max_rounds; i++)
+    int i = 0, unsatisfied_agents = 0, round = 0;
+    while (i < num_agents && round < max_rounds)
     {
+        if (i == 0)
+        {
+            printf("\n\nRound #%d started.", round);
+        }
         if (!is_satisfied(i))
         {
             unsatisfied_agents++;
             move_agent(i);
         }
+        i++;
         if (i == num_agents - 1)
         {
             printf("\nRound #%d ended.", round);
