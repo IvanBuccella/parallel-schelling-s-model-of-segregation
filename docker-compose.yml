@@ -1,6 +1,7 @@
 version: "3.7"
 services:
   openmpi:
+    platform: "linux/amd64"
     build:
       context: ./docker/openmpi
       dockerfile: Dockerfile.dev
