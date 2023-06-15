@@ -13,6 +13,7 @@
 #define size 10       // The grid size
 #define empty_perc 30 // The percentage threshold of empty cells
 #define t 30          // The percentage threshold of agent satisfaction
+#define max_rounds 10 // The max rounds number for satisfing the agents
 #define CHAR_BLUE 'B'
 #define CHAR_RED 'R'
 #define CHAR_EMPTY '-'
@@ -24,6 +25,7 @@ void print_grid();
 void initialize_agents();
 bool is_satisfied(int index);
 void move_agent(int index);
+bool all_agents_are_satisfied();
 
 int main()
 {
@@ -39,16 +41,36 @@ int main()
     initialize_agents();
     print_grid();
 
-    int i;
-    for (i = 0; i < num_agents; i++)
+    int i, unsatisfied_agents = 0, round = 0;
+    for (i = 0; i < num_agents && round < max_rounds; i++)
     {
         if (!is_satisfied(i))
         {
-            printf("\nThe agent in (%d,%d) is not satisfied", agents[i][0], agents[i][1]);
+            unsatisfied_agents++;
             move_agent(i);
         }
+        if (i == num_agents - 1)
+        {
+            printf("\nRound #%d ended.", round);
+            round++;
+            if (unsatisfied_agents > 0 && round < max_rounds - 1)
+            {
+                i = 0;
+                unsatisfied_agents = 0;
+            }
+        }
     }
+
     print_grid();
+
+    if (all_agents_are_satisfied())
+    {
+        printf("\nAll agents are satisfied");
+    }
+    else
+    {
+        printf("\nAll agents are not satisfied");
+    }
 
     end = MPI_Wtime();
     printf("\nTime in second = %f\n", end - start);
@@ -92,7 +114,7 @@ void initialize_agents()
 void print_grid()
 {
     int i, j;
-    printf("\n");
+    printf("\n\n");
     for (i = 0; i < size; i++)
     {
         for (j = 0; j < size; j++)
@@ -127,13 +149,7 @@ bool is_satisfied(int index)
             neighbors++;
         }
     }
-    int perc = (siblings * 100) / neighbors;
-    // printf("\nrow: %d", row);
-    // printf("\ncol: %d", col);
-    // printf("\nNeighbors: %d", neighbors);
-    // printf("\nSiblings: %d", siblings);
-    // printf("\nNeighbors/Siblings: %d", perc);
-    if (perc >= t)
+    if ((siblings * 100) / neighbors >= t)
     {
         return true;
     }
@@ -153,5 +169,18 @@ void move_agent(int index)
     grid[location[0]][location[1]] = grid[row][col];
     grid[row][col] = CHAR_EMPTY;
 
-    printf("\nThe agent in (%d,%d) has been moved on (%d,%d)", row, col, location[0], location[1]);
+    printf("\nThe agent in (%d,%d) is not satisfied and has been moved on (%d,%d)", row, col, location[0], location[1]);
+}
+
+bool all_agents_are_satisfied()
+{
+    int i;
+    for (i = 0; i < num_agents; i++)
+    {
+        if (!is_satisfied(i))
+        {
+            return false;
+        }
+    }
+    return true;
 }
