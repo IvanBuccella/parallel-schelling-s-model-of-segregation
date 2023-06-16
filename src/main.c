@@ -10,14 +10,16 @@
 #include <time.h>
 #endif
 
-#define size 10       // The grid size
-#define empty_perc 30 // The percentage threshold of empty cells
-#define t 30          // The percentage threshold of agent satisfaction
-#define max_rounds 10 // The max rounds number for satisfing the agents
+#define size 2000      // The grid size - remember that the maximum integer value is 2147483647
+#define empty_perc 30  // The percentage threshold of empty cells
+#define t 30           // The percentage threshold of agent satisfaction
+#define max_rounds 500 // The max rounds number for satisfing the agents
+#define num_agents ((size * size) * (100 - empty_perc)) / 100
+
 #define CHAR_BLUE 'B'
 #define CHAR_RED 'R'
 #define CHAR_EMPTY '-'
-#define num_agents ((size * size) - ((size * size) * empty_perc / 100))
+
 static char grid[size][size];
 static int agents[num_agents][2];
 
@@ -29,14 +31,15 @@ bool all_agents_are_satisfied();
 
 int main()
 {
-    double start, end;
+    clock_t time;
 
-    printf("\nThe grid size is: %dx%d", size, size);
+    printf("The grid size is: %dx%d", size, size);
     printf("\nThe percentage threshold of empty cells is: %d", empty_perc);
     printf("\nThe percentage threshold of agent satisfaction is: %d", t);
-    printf("\nNum Agents: %d", num_agents);
+    printf("\nThe max rounds number is: %d", max_rounds);
+    printf("\nThe number of agents is: %d", num_agents);
 
-    start = MPI_Wtime();
+    time = clock();
 
     initialize_agents();
     print_grid();
@@ -77,8 +80,8 @@ int main()
         printf("\nAll agents are not satisfied");
     }
 
-    end = MPI_Wtime();
-    printf("\nTime in second = %f\n", end - start);
+    time = clock() - time;
+    printf("\nTime in second = %f\n", ((double)time) / CLOCKS_PER_SEC);
 
     return 0;
 }
