@@ -17,9 +17,9 @@
 #define CHAR_BLUE 'B'
 #define CHAR_RED 'R'
 #define CHAR_EMPTY '-'
-int num_agents = (size * size) - ((size * size) * empty_perc / 100);
+#define num_agents ((size * size) - ((size * size) * empty_perc / 100))
 static char grid[size][size];
-static int agents[size][2];
+static int agents[num_agents][2];
 
 void print_grid();
 void initialize_agents();
