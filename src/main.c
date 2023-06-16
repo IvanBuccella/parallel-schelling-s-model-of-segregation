@@ -42,7 +42,7 @@ int main()
     time = clock();
 
     initialize_agents();
-    print_grid();
+    // print_grid();
 
     int i = 0, unsatisfied_agents = 0, round = 0;
     while (i < num_agents && round < max_rounds)
@@ -69,7 +69,7 @@ int main()
         }
     }
 
-    print_grid();
+    // print_grid();
 
     if (all_agents_are_satisfied())
     {
@@ -177,7 +177,7 @@ void move_agent(int index)
     grid[location[0]][location[1]] = grid[row][col];
     grid[row][col] = CHAR_EMPTY;
 
-    printf("\nThe agent in (%d,%d) is not satisfied and has been moved on (%d,%d)", row, col, location[0], location[1]);
+    // printf("\nThe agent in (%d,%d) is not satisfied and has been moved on (%d,%d)", row, col, location[0], location[1]);
 }
 
 bool all_agents_are_satisfied()
