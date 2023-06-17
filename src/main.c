@@ -23,18 +23,17 @@
 #define CHAR_RED 'R'
 #define CHAR_EMPTY '-'
 
-char **grid;
-int **agents;
-
 char **allocate_grid(int rows, int cols);
 int **allocate_agents();
 void print_grid(char **grid, int rows, int cols);
-void initialize_grid();
-void initialize_agents();
+void initialize_grid(char **grid);
+void initialize_agents(char **grid, int **agents);
 
 int main(int argc, char *argv[])
 {
     int rank, processors, workers = 0, num_rows = 0;
+    char **grid;
+    int **agents;
 
     double dt_start, dt_end;
     MPI_Status status;
@@ -44,7 +43,7 @@ int main(int argc, char *argv[])
     workers = processors - 1;
 
     dt_start = MPI_Wtime();
-    if (processors < 3) // if less than 2 processors, skip
+    if (processors < 3) // if less than 3 processors, skip
     {
         MPI_Abort(MPI_COMM_WORLD, 911);
         MPI_Finalize();
@@ -59,8 +58,10 @@ int main(int argc, char *argv[])
         printf("\nThe max rounds number is: %d", max_rounds);
         printf("\nThe number of agents is: %d", num_agents);
 
-        initialize_grid();
-        initialize_agents();
+        grid = allocate_grid(size, size);
+        agents = allocate_agents();
+        initialize_grid(grid);
+        initialize_agents(grid, agents);
         // print_grid(grid, size, size);
 
         int start_row;
@@ -109,9 +110,8 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-void initialize_grid()
+void initialize_grid(char **grid)
 {
-    grid = allocate_grid(size, size);
     int i, j;
     for (i = 0; i < size; i++)
     {
@@ -122,9 +122,8 @@ void initialize_grid()
     }
 }
 
-void initialize_agents()
+void initialize_agents(char **grid, int **agents)
 {
-    agents = allocate_agents();
     int i, j, location[2];
     for (i = 0; i < num_agents; i++)
     {
