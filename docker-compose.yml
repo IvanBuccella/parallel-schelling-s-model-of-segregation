@@ -7,6 +7,6 @@ services:
       dockerfile: Dockerfile.dev
     volumes:
       - "./src:/app"
-    #sh -c "chmod +x run.sh && ./run.sh"
+    #sh -c "cd /app && mpicc main.c -o main.out && mpirun -np 1 --allow-run-as-root ./main.out"
     command: >
-      sh -c "cd /app && mpicc main.c -o main.out && mpirun -np 1 --allow-run-as-root ./main.out"
+      sh -c "chmod +x run.sh && ./run.sh"
