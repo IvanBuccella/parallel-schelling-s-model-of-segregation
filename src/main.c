@@ -222,7 +222,7 @@ bool is_satisfied(int **grid, char *agents, int num_cols, int num_rows, int x, i
 {
     if (grid[x][y] == -1)
     {
-        return false;
+        return true;
     }
 
     int i, j, neighbors = 0, siblings = 0;
