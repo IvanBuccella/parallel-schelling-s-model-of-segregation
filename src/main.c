@@ -38,7 +38,7 @@ int get_num_rows_of_worker(int rank, int workers);
 
 int main(int argc, char *argv[])
 {
-    int rank, processors, workers = 0, num_rows = 0;
+    int rank, processors, workers = 0, num_rows = 0, finished = 0;
     int **grid;
     char *agents;
 
@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
 
         int start_row, rows_pointer;
 
-        for (int round = 0; round < 1; round++) // Add max rounds && is_satisfied check
+        for (int round = 0; round < 3; round++) // Add max rounds && is_satisfied check
         {
             printf("\n\nRound #%d started.", round);
             MPI_Request *requests = (MPI_Request *)malloc(workers * sizeof(MPI_Request));
@@ -86,6 +86,7 @@ int main(int argc, char *argv[])
                 {
                     start_row--;
                 }
+                MPI_Isend(&(finished), 1, MPI_INT, i, MESSAGE_TAG, MPI_COMM_WORLD, &(requests[i - 1]));
                 num_rows = get_num_rows_of_worker(i, workers);
                 MPI_Isend(&(num_rows), 1, MPI_INT, i, MESSAGE_TAG, MPI_COMM_WORLD, &(requests[i - 1]));
                 MPI_Isend(&(grid[start_row][0]), (num_rows * size), MPI_INT, i, MESSAGE_TAG, MPI_COMM_WORLD, &(requests[i - 1]));
@@ -97,27 +98,41 @@ int main(int argc, char *argv[])
 
             start_row = 0;
             num_rows = 0;
-            for (int i = 1; i <= workers; i++)
+            for (int i = 1; i <= workers; i++) // Evaluate to use the mpi reduce
             {
                 num_rows = get_num_rows_to_analyze(i, workers, get_num_rows_of_worker(i, workers)) - get_start_row_to_analyze(i, workers);
                 MPI_Recv(&(grid[start_row][0]), (num_rows * size), MPI_INT, i, MESSAGE_TAG, MPI_COMM_WORLD, &status);
                 start_row += (size / workers);
             }
             MPI_Free_mem(requests);
+
+            print_grid(grid, agents, 0, 0, size, size);
+        }
+
+        MPI_Request *requests = (MPI_Request *)malloc(workers * sizeof(MPI_Request));
+        finished = 1;
+        for (int i = 1; i <= workers; i++)
+        {
+            MPI_Isend(&(finished), 1, MPI_INT, i, MESSAGE_TAG, MPI_COMM_WORLD, &(requests[i - 1]));
         }
     }
     else // worker
     {
-        MPI_Recv(&(num_rows), 1, MPI_INT, MASTER_RANK, MESSAGE_TAG, MPI_COMM_WORLD, &status);
-        grid = allocate_grid(num_rows, size);
-        agents = allocate_agents(num_agents);
-        MPI_Recv(&(grid[0][0]), (num_rows * size), MPI_INT, MASTER_RANK, MESSAGE_TAG, MPI_COMM_WORLD, &status);
-        MPI_Recv(&(agents[0]), num_agents, MPI_CHAR, MASTER_RANK, MESSAGE_TAG, MPI_COMM_WORLD, &status);
-        int start_row = get_start_row_to_analyze(rank, workers);
-        num_rows = get_num_rows_to_analyze(rank, workers, num_rows);
-        optimize_agents(rank, workers, grid, agents, start_row, 0, size, num_rows);
-        num_rows = num_rows - start_row;
-        MPI_Send(&(grid[start_row][0]), (num_rows * size), MPI_INT, MASTER_RANK, MESSAGE_TAG, MPI_COMM_WORLD);
+        MPI_Recv(&(finished), 1, MPI_INT, MASTER_RANK, MESSAGE_TAG, MPI_COMM_WORLD, &status);
+        while (finished == 0)
+        {
+            MPI_Recv(&(num_rows), 1, MPI_INT, MASTER_RANK, MESSAGE_TAG, MPI_COMM_WORLD, &status);
+            grid = allocate_grid(num_rows, size);
+            agents = allocate_agents(num_agents);
+            MPI_Recv(&(grid[0][0]), (num_rows * size), MPI_INT, MASTER_RANK, MESSAGE_TAG, MPI_COMM_WORLD, &status);
+            MPI_Recv(&(agents[0]), num_agents, MPI_CHAR, MASTER_RANK, MESSAGE_TAG, MPI_COMM_WORLD, &status);
+            int start_row = get_start_row_to_analyze(rank, workers);
+            num_rows = get_num_rows_to_analyze(rank, workers, num_rows);
+            optimize_agents(rank, workers, grid, agents, start_row, 0, size, num_rows);
+            num_rows = num_rows - start_row;
+            MPI_Send(&(grid[start_row][0]), (num_rows * size), MPI_INT, MASTER_RANK, MESSAGE_TAG, MPI_COMM_WORLD);
+            MPI_Recv(&(finished), 1, MPI_INT, MASTER_RANK, MESSAGE_TAG, MPI_COMM_WORLD, &status);
+        }
     }
 
     MPI_Barrier(MPI_COMM_WORLD);
