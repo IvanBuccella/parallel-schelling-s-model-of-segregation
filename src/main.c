@@ -105,6 +105,7 @@ int main(int argc, char *argv[])
         }
 
         MPI_Free_mem(grid);
+        MPI_Free_mem(agents);
     }
     else // worker
     {
@@ -115,6 +116,7 @@ int main(int argc, char *argv[])
         MPI_Recv(&(agents[0]), num_agents, MPI_CHAR, MASTER_RANK, MESSAGE_TAG, MPI_COMM_WORLD, &status);
         optimize_agents(rank, workers, grid, agents, size, get_grid_height_of_worker(rank, workers, num_rows));
         MPI_Free_mem(grid);
+        MPI_Free_mem(agents);
     }
 
     MPI_Barrier(MPI_COMM_WORLD);
