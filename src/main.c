@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
                 }
                 MPI_Isend(&(num_rows), 1, MPI_INT, i, MESSAGE_TAG, MPI_COMM_WORLD, &(requests[i - 1]));
                 MPI_Isend(&(grid[start_row][0]), (num_rows * size), MPI_INT, i, MESSAGE_TAG, MPI_COMM_WORLD, &(requests[i - 1]));
-                MPI_Isend(&(agents[0]), (num_agents * 2), MPI_CHAR, i, MESSAGE_TAG, MPI_COMM_WORLD, &(requests[i - 1]));
+                MPI_Isend(&(agents[0]), num_agents, MPI_CHAR, i, MESSAGE_TAG, MPI_COMM_WORLD, &(requests[i - 1]));
                 rows_pointer += (size / workers);
             }
             MPI_Waitall(workers, requests, MPI_STATUSES_IGNORE);
@@ -112,7 +112,7 @@ int main(int argc, char *argv[])
         grid = allocate_grid(num_rows, size);
         agents = allocate_agents(num_agents);
         MPI_Recv(&(grid[0][0]), (num_rows * size), MPI_INT, MASTER_RANK, MESSAGE_TAG, MPI_COMM_WORLD, &status);
-        MPI_Recv(&(agents[0]), (num_agents * 2), MPI_CHAR, MASTER_RANK, MESSAGE_TAG, MPI_COMM_WORLD, &status);
+        MPI_Recv(&(agents[0]), num_agents, MPI_CHAR, MASTER_RANK, MESSAGE_TAG, MPI_COMM_WORLD, &status);
         optimize_agents(rank, workers, grid, agents, size, get_grid_height_of_worker(rank, workers, num_rows));
         MPI_Free_mem(grid);
     }
