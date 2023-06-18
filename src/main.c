@@ -1,20 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include <math.h>
 #include <stdbool.h>
-#include <stdlib.h>
-#ifdef _WIN32
-#include <sys/time.h>
-#else
-#include <time.h>
-#endif
 #include "mpi.h"
 
-#define size 10                                               // The grid size - remember that the maximum integer value is 2147483647
+#define size 40                                               // The grid size - remember that the maximum integer value is 2147483647
 #define empty_perc 30                                         // The percentage threshold of empty cells
 #define t 30                                                  // The percentage threshold of agent satisfaction
-#define max_rounds 500                                        // The max steps number for satisfing the agents
+#define max_rounds 1000                                       // The max steps number for satisfing the agents
 #define num_agents ((size * size) * (100 - empty_perc)) / 100 // The number of agents to be satisfied
 #define MESSAGE_TAG 50
 #define MASTER_RANK 0
@@ -35,6 +27,7 @@ bool has_free_cells(int **grid, int num_cols, int num_rows, int start_row, int s
 int get_num_rows_to_analyze(int rank, int workers, int num_rows);
 int get_start_row_to_analyze(int rank, int workers);
 int get_num_rows_of_worker(int rank, int workers);
+bool all_agents_are_satisfied(int **grid, char *agents, int num_cols, int num_rows);
 
 int main(int argc, char *argv[])
 {
@@ -69,11 +62,12 @@ int main(int argc, char *argv[])
         agents = allocate_agents(num_agents);
         initialize_grid(grid);
         initialize_agents(grid, agents);
-        print_grid(grid, agents, 0, 0, size, size);
+        // print_grid(grid, agents, 0, 0, size, size);
 
         int start_row, rows_pointer;
+        bool all_satisfied = false;
 
-        for (int round = 0; round < 3; round++) // Add max rounds && is_satisfied check
+        for (int round = 0; round < max_rounds && !all_satisfied; round++) // Add max rounds && is_satisfied check
         {
             printf("\n\nRound #%d started.", round);
             MPI_Request *requests = (MPI_Request *)malloc(workers * sizeof(MPI_Request));
@@ -98,7 +92,7 @@ int main(int argc, char *argv[])
 
             start_row = 0;
             num_rows = 0;
-            for (int i = 1; i <= workers; i++) // Evaluate to use the mpi reduce
+            for (int i = 1; i <= workers; i++)
             {
                 num_rows = get_num_rows_to_analyze(i, workers, get_num_rows_of_worker(i, workers)) - get_start_row_to_analyze(i, workers);
                 MPI_Recv(&(grid[start_row][0]), (num_rows * size), MPI_INT, i, MESSAGE_TAG, MPI_COMM_WORLD, &status);
@@ -106,7 +100,13 @@ int main(int argc, char *argv[])
             }
             MPI_Free_mem(requests);
 
-            print_grid(grid, agents, 0, 0, size, size);
+            // print_grid(grid, agents, 0, 0, size, size);
+            all_satisfied = all_agents_are_satisfied(grid, agents, size, size);
+        }
+
+        if (all_satisfied)
+        {
+            printf("All agents are satisfied");
         }
 
         MPI_Request *requests = (MPI_Request *)malloc(workers * sizeof(MPI_Request));
@@ -299,7 +299,6 @@ void optimize_agents(int rank, int workers, int **grid, char *agents, int start_
             {
                 continue;
             }
-            // printf("\nIs Satisfied (%d,%d): %d", i, j, is_satisfied(grid, agents, num_cols, num_rows, i, j));
             if (!is_satisfied(grid, agents, num_cols, num_rows, i, j))
             {
                 move_agent(grid, num_cols, num_rows, start_row, start_column, i, j);
@@ -351,4 +350,19 @@ int get_num_rows_of_worker(int rank, int workers)
     {
         return (size / workers) + 2;
     }
+}
+
+bool all_agents_are_satisfied(int **grid, char *agents, int num_cols, int num_rows)
+{
+    for (int i = 0; i < num_rows; i++)
+    {
+        for (int j = 0; j < num_cols; j++)
+        {
+            if (!is_satisfied(grid, agents, num_cols, num_rows, i, j))
+            {
+                return false;
+            }
+        }
+    }
+    return true;
 }
