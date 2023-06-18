@@ -34,6 +34,7 @@ void move_agent(int **grid, int num_cols, int num_rows, int start_row, int start
 bool has_free_cells(int **grid, int num_cols, int num_rows, int start_row, int start_column);
 int get_num_rows_to_analyze(int rank, int workers, int num_rows);
 int get_start_row_to_analyze(int rank, int workers);
+int get_num_rows_of_worker(int rank, int workers);
 
 int main(int argc, char *argv[])
 {
@@ -81,31 +82,29 @@ int main(int argc, char *argv[])
             for (int i = 1; i <= workers; i++)
             {
                 start_row = rows_pointer;
-                if (i == 1)
-                {
-                    num_rows = (size / workers) + 1;
-                }
-                else if (i == workers)
+                if (i > 1)
                 {
                     start_row--;
-                    num_rows = (size / workers) + (size % workers) + 1;
                 }
-                else
-                {
-                    start_row--;
-                    num_rows = (size / workers) + 2;
-                }
+                num_rows = get_num_rows_of_worker(i, workers);
                 MPI_Isend(&(num_rows), 1, MPI_INT, i, MESSAGE_TAG, MPI_COMM_WORLD, &(requests[i - 1]));
                 MPI_Isend(&(grid[start_row][0]), (num_rows * size), MPI_INT, i, MESSAGE_TAG, MPI_COMM_WORLD, &(requests[i - 1]));
                 MPI_Isend(&(agents[0]), num_agents, MPI_CHAR, i, MESSAGE_TAG, MPI_COMM_WORLD, &(requests[i - 1]));
                 rows_pointer += (size / workers);
             }
+
             MPI_Waitall(workers, requests, MPI_STATUSES_IGNORE);
+
+            start_row = 0;
+            num_rows = 0;
+            for (int i = 1; i <= workers; i++)
+            {
+                num_rows = get_num_rows_to_analyze(i, workers, get_num_rows_of_worker(i, workers)) - get_start_row_to_analyze(i, workers);
+                MPI_Recv(&(grid[start_row][0]), (num_rows * size), MPI_INT, i, MESSAGE_TAG, MPI_COMM_WORLD, &status);
+                start_row += (size / workers);
+            }
             MPI_Free_mem(requests);
         }
-
-        MPI_Free_mem(grid);
-        MPI_Free_mem(agents);
     }
     else // worker
     {
@@ -117,11 +116,13 @@ int main(int argc, char *argv[])
         int start_row = get_start_row_to_analyze(rank, workers);
         num_rows = get_num_rows_to_analyze(rank, workers, num_rows);
         optimize_agents(rank, workers, grid, agents, start_row, 0, size, num_rows);
-        MPI_Free_mem(grid);
-        MPI_Free_mem(agents);
+        num_rows = num_rows - start_row;
+        MPI_Send(&(grid[start_row][0]), (num_rows * size), MPI_INT, MASTER_RANK, MESSAGE_TAG, MPI_COMM_WORLD);
     }
 
     MPI_Barrier(MPI_COMM_WORLD);
+    MPI_Free_mem(grid);
+    MPI_Free_mem(agents);
     MPI_Finalize();
     dt_end = MPI_Wtime();
 
@@ -319,4 +320,20 @@ void move_agent(int **grid, int num_cols, int num_rows, int start_row, int start
     grid[x][y] = grid[row][col];
     grid[row][col] = -1;
     // printf("\nThe agent in (%d,%d) is not satisfied and has been moved on (%d,%d)", row, col, x, y);
+}
+
+int get_num_rows_of_worker(int rank, int workers)
+{
+    if (rank == 1)
+    {
+        return (size / workers) + 1;
+    }
+    else if (rank == workers)
+    {
+        return (size / workers) + (size % workers) + 1;
+    }
+    else
+    {
+        return (size / workers) + 2;
+    }
 }
