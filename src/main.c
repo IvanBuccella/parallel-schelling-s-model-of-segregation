@@ -64,22 +64,35 @@ int main(int argc, char *argv[])
         initialize_agents(grid, agents);
         // print_grid(grid, size, size);
 
-        int start_row;
+        int start_row, rows_pointer;
 
         for (int round = 0; round < 1; round++) // Add max rounds && is_satisfied check
         {
             printf("\n\nRound #%d started.", round);
             MPI_Request *requests = (MPI_Request *)malloc(workers * sizeof(MPI_Request));
             start_row = 0;
+            rows_pointer = 0;
             for (int i = 1; i <= workers; i++)
             {
-                num_rows = size / workers;
-                if (i == workers)
+                start_row = rows_pointer;
+                if (i == 1)
                 {
-                    num_rows += size % workers;
+                    num_rows = (size / workers) + 1;
                 }
+                else if (i == workers)
+                {
+                    start_row--;
+                    num_rows = (size / workers) + (size % workers) + 1;
+                }
+                else
+                {
+                    start_row--;
+                    num_rows = (size / workers) + 2;
+                }
+                MPI_Isend(&(num_rows), 1, MPI_INT, i, MESSAGE_TAG, MPI_COMM_WORLD, &(requests[i - 1]));
                 MPI_Isend(&(grid[start_row][0]), (num_rows * size), MPI_CHAR, i, MESSAGE_TAG, MPI_COMM_WORLD, &(requests[i - 1]));
-                start_row += num_rows;
+                MPI_Isend(&(agents[0][0]), (num_agents * 2), MPI_INT, i, MESSAGE_TAG, MPI_COMM_WORLD, &(requests[i - 1]));
+                rows_pointer += (size / workers);
             }
             MPI_Waitall(workers, requests, MPI_STATUSES_IGNORE);
             MPI_Free_mem(requests);
@@ -89,13 +102,11 @@ int main(int argc, char *argv[])
     }
     else // worker
     {
-        num_rows = size / workers;
-        if (rank == workers)
-        {
-            num_rows += size % workers;
-        }
+        MPI_Recv(&(num_rows), 1, MPI_INT, MASTER_RANK, MESSAGE_TAG, MPI_COMM_WORLD, &status);
         grid = allocate_grid(num_rows, size);
+        agents = allocate_agents();
         MPI_Recv(&(grid[0][0]), (num_rows * size), MPI_CHAR, MASTER_RANK, MESSAGE_TAG, MPI_COMM_WORLD, &status);
+        MPI_Recv(&(agents[0][0]), (num_agents * 2), MPI_INT, MASTER_RANK, MESSAGE_TAG, MPI_COMM_WORLD, &status);
         // print_grid(grid, num_rows, size);
         MPI_Free_mem(grid);
     }
