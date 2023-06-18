@@ -25,13 +25,15 @@
 
 int **allocate_grid(int rows, int cols);
 char *allocate_agents(int number);
-void print_grid(int **grid, char *agents, int rows, int cols);
+void print_grid(int **grid, char *agents, int start_row, int start_column, int rows, int cols);
 void initialize_grid(int **grid);
 void initialize_agents(int **grid, char *agents);
 bool is_satisfied(int **grid, char *agents, int grid_width, int grid_height, int x, int y);
 void optimize_agents(int rank, int workers, int **grid, char *agents, int grid_width, int grid_height);
 void move_agent(int **grid, int grid_width, int grid_height, int start_row, int start_column, int row, int col);
 bool has_free_cells(int **grid, int grid_width, int grid_height, int start_row, int start_column);
+int get_grid_height_of_worker(int rank, int workers, int num_rows);
+int get_start_row_of_worker(int rank, int workers);
 
 int main(int argc, char *argv[])
 {
@@ -66,7 +68,7 @@ int main(int argc, char *argv[])
         agents = allocate_agents(num_agents);
         initialize_grid(grid);
         initialize_agents(grid, agents);
-        // print_grid(grid, agents, size, size);
+        print_grid(grid, agents, 0, 0, size, size);
 
         int start_row, rows_pointer;
 
@@ -111,7 +113,7 @@ int main(int argc, char *argv[])
         agents = allocate_agents(num_agents);
         MPI_Recv(&(grid[0][0]), (num_rows * size), MPI_INT, MASTER_RANK, MESSAGE_TAG, MPI_COMM_WORLD, &status);
         MPI_Recv(&(agents[0]), (num_agents * 2), MPI_CHAR, MASTER_RANK, MESSAGE_TAG, MPI_COMM_WORLD, &status);
-        optimize_agents(rank, workers, grid, agents, size, num_rows);
+        optimize_agents(rank, workers, grid, agents, size, get_grid_height_of_worker(rank, workers, num_rows));
         MPI_Free_mem(grid);
     }
 
@@ -159,12 +161,12 @@ void initialize_agents(int **grid, char *agents)
     }
 }
 
-void print_grid(int **grid, char *agents, int rows, int cols)
+void print_grid(int **grid, char *agents, int start_row, int start_column, int rows, int cols)
 {
     printf("\n\n");
-    for (int i = 0; i < rows; i++)
+    for (int i = start_row; i < rows; i++)
     {
-        for (int j = 0; j < cols; j++)
+        for (int j = start_column; j < cols; j++)
         {
             if (grid[i][j] == -1)
             {
@@ -232,22 +234,40 @@ bool is_satisfied(int **grid, char *agents, int grid_width, int grid_height, int
     return false;
 }
 
-void optimize_agents(int rank, int workers, int **grid, char *agents, int grid_width, int grid_height)
+int get_start_row_of_worker(int rank, int workers)
 {
-    int start_row = 0, start_column = 0;
     if (rank == 1)
     {
-        grid_height--;
+        return 0;
     }
     else if (rank == workers)
     {
-        start_row = 1;
+        return 1;
     }
     else
     {
-        start_row = 1;
-        grid_height--;
+        return 1;
     }
+}
+int get_grid_height_of_worker(int rank, int workers, int num_rows)
+{
+    if (rank == 1)
+    {
+        return num_rows - 1;
+    }
+    else if (rank == workers)
+    {
+        return num_rows;
+    }
+    else
+    {
+        return num_rows - 1;
+    }
+}
+
+void optimize_agents(int rank, int workers, int **grid, char *agents, int grid_width, int grid_height)
+{
+    int start_row = get_start_row_of_worker(rank, workers), start_column = 0;
     if (!has_free_cells(grid, grid_width, grid_height, start_row, start_column))
     {
         return;
