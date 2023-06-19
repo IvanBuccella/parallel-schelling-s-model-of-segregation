@@ -4,10 +4,10 @@
 #include "mpi.h"
 #include "string.h"
 
-#define size 40                                               // The grid size - remember that the maximum integer value is 2147483647
+#define size 2000                                             // The grid size - remember that the maximum integer value is 2147483647
 #define empty_perc 30                                         // The percentage threshold of empty cells
 #define t 30                                                  // The percentage threshold of agent satisfaction
-#define max_rounds 1000                                       // The max steps number for satisfing the agents
+#define max_rounds 500                                        // The max steps number for satisfing the agents
 #define num_agents ((size * size) * (100 - empty_perc)) / 100 // The number of agents to be satisfied
 #define MESSAGE_TAG 50
 #define MASTER_RANK 0
@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
     bool all_satisfied = false;
 
     dt_start = MPI_Wtime();
-    if (size < workers || processors < 3) // if less than 3 processors, or I cannot split the grid between the workers, skip
+    if (size < workers || processors < 2) // if less than 3 processors, or I cannot split the grid between the workers, skip
     {
         MPI_Abort(MPI_COMM_WORLD, 911);
         MPI_Finalize();
@@ -270,6 +270,10 @@ int get_num_rows_to_analyze(int rank, int workers, int num_rows)
 {
     if (rank == 1)
     {
+        if (rank == workers)
+        {
+            return num_rows;
+        }
         return num_rows - 1;
     }
     else if (rank == workers)
@@ -336,6 +340,10 @@ int get_num_rows_of_worker(int rank, int workers)
 {
     if (rank == 1)
     {
+        if (rank == workers)
+        {
+            return size;
+        }
         return (size / workers) + 1;
     }
     else if (rank == workers)

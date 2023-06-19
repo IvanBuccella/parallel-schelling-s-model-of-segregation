@@ -7,7 +7,7 @@ echo "End compiling"
 
 echo "Starting the test"
 echo "Start test" > log.txt
-for i in {4..4}
+for i in {2..4}
 do
   echo "Run with $i processors" >> log.txt
   mpirun -np $i --allow-run-as-root ./main.out >> log.txt
