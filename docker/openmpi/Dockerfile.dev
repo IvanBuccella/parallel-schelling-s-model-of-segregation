@@ -1,3 +1,4 @@
 FROM spagnuolocarmine/docker-mpi:latest
 WORKDIR /
 COPY ./run.sh ./run.sh
+COPY ./correctness.sh ./correctness.sh

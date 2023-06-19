@@ -5,11 +5,10 @@ echo "Compiling the project"
 mpicc main.c -o main.out
 echo "End compiling"
 
-echo "Starting the test"
-echo "Start test" > log.txt
-for i in {2..4}
+echo -e "\n------------------Starting the test------------------"
+for i in {2..10}
 do
-  echo "Run with $i processors" >> log.txt
-  mpirun -np $i --allow-run-as-root ./main.out >> log.txt
+  echo -e "\n\nRun with $i processors"
+  mpirun -np $i --allow-run-as-root ./main.out
 done
-echo "Test ended"
+echo -e "\n------------------Test ended------------------"

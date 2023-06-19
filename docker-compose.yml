@@ -1,12 +1,20 @@
 version: "3.7"
 services:
-  openmpi:
+  runner:
     platform: "linux/amd64"
     build:
       context: ./docker/openmpi
       dockerfile: Dockerfile.dev
     volumes:
       - "./src:/app"
-    #sh -c "cd /app && mpicc main.c -o main.out && mpirun -np 1 --allow-run-as-root ./main.out"
     command: >
       sh -c "chmod +x run.sh && ./run.sh"
+  correctness:
+    platform: "linux/amd64"
+    build:
+      context: ./docker/openmpi
+      dockerfile: Dockerfile.dev
+    volumes:
+      - "./src:/app"
+    command: >
+      sh -c "chmod +x correctness.sh && ./correctness.sh"      

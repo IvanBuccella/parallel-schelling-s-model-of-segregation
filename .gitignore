@@ -3,5 +3,5 @@
 .env.backup
 .env.production
 .python-version
-src/log.txt
+src/*.txt
 src/*.out

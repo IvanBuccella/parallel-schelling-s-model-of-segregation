@@ -7,7 +7,7 @@
 #define size 2000                                             // The grid size - remember that the maximum integer value is 2147483647
 #define empty_perc 30                                         // The percentage threshold of empty cells
 #define t 30                                                  // The percentage threshold of agent satisfaction
-#define max_rounds 500                                        // The max steps number for satisfing the agents
+#define max_rounds 50                                         // The max steps number for satisfing the agents
 #define num_agents ((size * size) * (100 - empty_perc)) / 100 // The number of agents to be satisfied
 #define MESSAGE_TAG 50
 #define MASTER_RANK 0
@@ -70,7 +70,6 @@ int main(int argc, char *argv[])
         int rows_pointer;
         for (int round = 0; round < max_rounds && !all_satisfied; round++)
         {
-            // printf("\n\nRound #%d started.", round);
             MPI_Request *requests = (MPI_Request *)malloc(workers * sizeof(MPI_Request));
             start_row = 0;
             rows_pointer = 0;
@@ -99,8 +98,6 @@ int main(int argc, char *argv[])
                 start_row += (size / workers);
             }
             MPI_Free_mem(requests);
-
-            // print_grid(grid, agents, 0, 0, size, size);
             all_satisfied = all_agents_are_satisfied(grid, agents, size, size);
         }
 
@@ -137,7 +134,15 @@ int main(int argc, char *argv[])
 
     if (rank == 0)
     {
-        printf("All agents are satisfied: %s \nTime in second = %f\n", (all_satisfied ? "Yes" : "No"), (dt_end - dt_start));
+        if (all_satisfied)
+        {
+            printf("All agents are satisfied");
+        }
+        else
+        {
+            printf("All agents are not satisfied");
+        }
+        // printf("\nTime in second = %f\n", (dt_end - dt_start));
     }
 
     return 0;
@@ -333,7 +338,6 @@ void move_agent(int **grid, int start_row, int start_column, int num_rows, int n
     } while (grid[x][y] != -1);
     grid[x][y] = grid[row][col];
     grid[row][col] = -1;
-    // printf("\nThe agent in (%d,%d) is not satisfied and has been moved on (%d,%d)", row, col, x, y);
 }
 
 int get_num_rows_of_worker(int rank, int workers)
