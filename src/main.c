@@ -239,12 +239,14 @@ bool is_satisfied(int **grid, char *agents, int num_cols, int num_rows, int x, i
             {
                 continue;
             }
-
             if (agents[grid[x][y]] == agents[grid[i][j]])
             {
                 siblings++;
             }
-            neighbors++;
+            if (grid[i][j] != -1)
+            {
+                neighbors++;
+            }
         }
     }
     if ((siblings * 100) / neighbors >= t)
