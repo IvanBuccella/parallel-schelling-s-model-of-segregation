@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include "mpi.h"
+#include "string.h"
 
 #define size 40                                               // The grid size - remember that the maximum integer value is 2147483647
 #define empty_perc 30                                         // The percentage threshold of empty cells
@@ -42,6 +43,7 @@ int main(int argc, char *argv[])
     MPI_Comm_size(MPI_COMM_WORLD, &processors);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     workers = processors - 1;
+    bool all_satisfied = false;
 
     dt_start = MPI_Wtime();
     if (size < workers || processors < 3) // if less than 3 processors, or I cannot split the grid between the workers, skip
@@ -53,11 +55,11 @@ int main(int argc, char *argv[])
 
     if (rank == MASTER_RANK) // master
     {
-        printf("The grid size is: %dx%d", size, size);
-        printf("\nThe percentage threshold of empty cells is: %d", empty_perc);
-        printf("\nThe percentage threshold of agent satisfaction is: %d", t);
-        printf("\nThe max rounds number is: %d", max_rounds);
-        printf("\nThe number of agents is: %d", num_agents);
+        // printf("The grid size is: %dx%d", size, size);
+        // printf("\nThe percentage threshold of empty cells is: %d", empty_perc);
+        // printf("\nThe percentage threshold of agent satisfaction is: %d", t);
+        // printf("\nThe max rounds number is: %d", max_rounds);
+        // printf("\nThe number of agents is: %d", num_agents);
 
         grid = allocate_grid(size, size);
         agents = allocate_agents(num_agents);
@@ -66,11 +68,9 @@ int main(int argc, char *argv[])
         // print_grid(grid, agents, 0, 0, size, size);
 
         int rows_pointer;
-        bool all_satisfied = false;
-
         for (int round = 0; round < max_rounds && !all_satisfied; round++)
         {
-            printf("\n\nRound #%d started.", round);
+            // printf("\n\nRound #%d started.", round);
             MPI_Request *requests = (MPI_Request *)malloc(workers * sizeof(MPI_Request));
             start_row = 0;
             rows_pointer = 0;
@@ -102,11 +102,6 @@ int main(int argc, char *argv[])
 
             // print_grid(grid, agents, 0, 0, size, size);
             all_satisfied = all_agents_are_satisfied(grid, agents, size, size);
-        }
-
-        if (all_satisfied)
-        {
-            printf("All agents are satisfied");
         }
 
         MPI_Request *requests = (MPI_Request *)malloc(workers * sizeof(MPI_Request));
@@ -141,7 +136,9 @@ int main(int argc, char *argv[])
     dt_end = MPI_Wtime();
 
     if (rank == 0)
-        printf("\nTime in second = %f\n", dt_end - dt_start);
+    {
+        printf("All agents are satisfied: %s \nTime in second = %f\n", (all_satisfied ? "Yes" : "No"), (dt_end - dt_start));
+    }
 
     return 0;
 }
