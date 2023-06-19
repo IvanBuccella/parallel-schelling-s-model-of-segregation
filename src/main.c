@@ -225,7 +225,7 @@ bool is_satisfied(int **grid, char *agents, int num_cols, int num_rows, int x, i
         return true;
     }
 
-    int i, j, neighbors = 0, siblings = 0;
+    int i, j, neighbors = 1, siblings = 0;
 
     for (i = x - 1; i <= x + 1; i++)
     {
