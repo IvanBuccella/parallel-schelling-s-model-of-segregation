@@ -278,11 +278,11 @@ int get_num_rows_to_analyze(int rank, int workers, int num_rows)
     }
     else if (rank == workers)
     {
-        return num_rows;
+        return num_rows - 1;
     }
     else
     {
-        return num_rows - 1;
+        return num_rows - 2;
     }
 }
 
