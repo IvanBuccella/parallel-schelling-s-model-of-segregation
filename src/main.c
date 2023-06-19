@@ -20,10 +20,10 @@ char *allocate_agents(int number);
 void print_grid(int **grid, char *agents, int start_row, int start_column, int rows, int cols);
 void initialize_grid(int **grid);
 void initialize_agents(int **grid, char *agents);
-bool is_satisfied(int **grid, char *agents, int num_rows, int num_cols, int x, int y);
+bool is_satisfied(int **grid, char *agents, int start_row, int start_column, int total_num_rows, int total_num_cols, int x, int y);
 void optimize_agents(int rank, int workers, int **grid, char *agents, int start_row, int start_column, int num_rows, int num_cols);
-void move_agent(int **grid, int num_cols, int num_rows, int start_row, int start_column, int row, int col);
-bool has_free_cells(int **grid, int num_cols, int num_rows, int start_row, int start_column);
+void move_agent(int **grid, int start_row, int start_column, int num_rows, int num_cols, int row, int col);
+bool has_free_cells(int **grid, int start_row, int start_column, int num_rows, int num_cols);
 int get_num_rows_to_analyze(int rank, int workers, int num_rows);
 int get_start_row_to_analyze(int rank, int workers);
 int get_start_row_of_worker(int rank, int workers);
@@ -217,24 +217,23 @@ char *allocate_agents(int number)
     return array;
 }
 
-bool is_satisfied(int **grid, char *agents, int num_rows, int num_cols, int x, int y)
+bool is_satisfied(int **grid, char *agents, int start_row, int start_column, int total_num_rows, int total_num_cols, int x, int y)
 {
     if (grid[x][y] == -1)
     {
         return true;
     }
-
     int i, j, neighbors = 1, siblings = 0;
 
     for (i = x - 1; i <= x + 1; i++)
     {
-        if (i < 0 || i > num_rows - 1)
+        if (i < 0 || i > total_num_rows - 1)
         {
             continue;
         }
         for (j = y - 1; j <= y + 1; j++)
         {
-            if (j < 0 || j > num_cols - 1 || (i == x && j == y))
+            if (j < 0 || j > total_num_cols - 1 || (i == x && j == y))
             {
                 continue;
             }
@@ -288,33 +287,33 @@ int get_num_rows_to_analyze(int rank, int workers, int num_rows)
 
 void optimize_agents(int rank, int workers, int **grid, char *agents, int start_row, int start_column, int num_rows, int num_cols)
 {
-    if (!has_free_cells(grid, num_cols, num_rows, start_row, start_column))
+    if (!has_free_cells(grid, start_row, start_column, num_rows, num_cols))
     {
         return;
     }
-    for (int i = start_row; i < num_rows + start_row; i++)
+    for (int i = 0; i < num_rows; i++)
     {
-        for (int j = start_column; j < num_cols + start_column; j++)
+        for (int j = 0; j < num_cols; j++)
         {
-            if (grid[i][j] == -1)
+            if (grid[i + start_row][j + start_column] == -1)
             {
                 continue;
             }
-            if (!is_satisfied(grid, agents, num_rows, num_cols, i, j))
+            if (!is_satisfied(grid, agents, start_row, start_column, get_num_rows_of_worker(rank, workers), num_cols, i + start_row, j + start_column))
             {
-                move_agent(grid, num_cols, num_rows, start_row, start_column, i, j);
+                move_agent(grid, start_row, start_column, num_rows, num_cols, i + start_row, j + start_column);
             }
         }
     }
 }
 
-bool has_free_cells(int **grid, int num_cols, int num_rows, int start_row, int start_column)
+bool has_free_cells(int **grid, int start_row, int start_column, int num_rows, int num_cols)
 {
-    for (int i = start_row; i < num_rows + start_row; i++)
+    for (int i = 0; i < num_rows; i++)
     {
-        for (int j = start_column; j < num_cols + start_column; j++)
+        for (int j = 0; j < num_cols; j++)
         {
-            if (grid[i][j] == -1)
+            if (grid[i + start_row][j + start_column] == -1)
             {
                 return true;
             }
@@ -323,15 +322,14 @@ bool has_free_cells(int **grid, int num_cols, int num_rows, int start_row, int s
     return false;
 }
 
-void move_agent(int **grid, int num_cols, int num_rows, int start_row, int start_column, int row, int col)
+void move_agent(int **grid, int start_row, int start_column, int num_rows, int num_cols, int row, int col)
 {
     int x, y;
     do
     {
-        x = rand() % num_rows;
-        y = rand() % num_cols;
-
-    } while (grid[x][y] != -1 || x < start_row || y < start_column);
+        x = (rand() % (num_rows)) + start_row;
+        y = (rand() % (num_cols)) + start_column;
+    } while (grid[x][y] != -1);
     grid[x][y] = grid[row][col];
     grid[row][col] = -1;
     // printf("\nThe agent in (%d,%d) is not satisfied and has been moved on (%d,%d)", row, col, x, y);
@@ -375,7 +373,7 @@ bool all_agents_are_satisfied(int **grid, char *agents, int num_cols, int num_ro
     {
         for (int j = 0; j < num_cols; j++)
         {
-            if (!is_satisfied(grid, agents, num_rows, num_cols, i, j))
+            if (!is_satisfied(grid, agents, 0, 0, num_rows, num_cols, i, j))
             {
                 return false;
             }
