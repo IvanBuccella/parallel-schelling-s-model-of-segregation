@@ -26,14 +26,14 @@ The `MASTER` is the processor with the rank `0` and a generic `SLAVE x` has the 
 
 ### The solution
 
-The solution follows this steps:
+The solution follows these steps:
 
 1.  The `MASTER` processor allocates the grid and place all the agents by using the `initialize_grid` and `initialize_agents` functions.
 2.  Until the max_rounds number is `NOT` reached `OR` all agents are `NOT` satisfied:
 
-    1. The `MASTER` processor splits the grid rows over the `SLAVE` processors and `send` the corresponding portion to them. <small>The grid is split by assigning `(size/workers)` rows to every `SLAVE` (except for the remaining rows that are assigned to the last `SLAVE` if the `size` is not divisible for `workers`)</small>
+    1. The `MASTER` processor splits the grid rows over the `SLAVE` processors and `send` the corresponding portion to them. <small>The grid is split by assigning `(size/workers)` rows to every `SLAVE` (except for the remaining rows that are assigned to the last `SLAVE` if the `size` is not divisible for `workers`)</small>.
     2. The `SLAVE` processor `receive` its protion of the matrix and move the unsatisfied agents by using the `optimize_agents` function. Then it `send` back to the `MASTER` processor its modified matrix.
-    3. The `MASTER` processor `receive` from all the `SLAVE` processors their portions and update the matrix.
+    3. The `MASTER` processor `receives` from all the `SLAVE` processors their portions and updates its own matrix.
 
 3.  The `MASTER` prints out the result of the simulation.
 
