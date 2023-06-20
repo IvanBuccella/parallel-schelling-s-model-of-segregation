@@ -2,11 +2,11 @@
 
 ## Introduction
 
-This algorithm uses a parallel programming approach, by exploiting distributed memory, for solving Schelling's model of segregation. Its behaviour allows to satisfy all the agents into the grid in less time than usual by exploiting the concurrent execution over more processors or nodes.
+This algorithm uses a parallel programming approach, by exploiting distributed memory, for solving Schelling's model of segregation. Its behavior allows to satisfy all the agents into the grid in less time than usual by exploiting the concurrent execution over more processors or nodes.
 
 ## The problem
 
-In 1971, the American economist Thomas Schelling created an agent-based model that suggested inadvertent behavior might also contribute to segregation. His model of segregation showed that even when individuals (or "agents") didn't mind being surrounded or living by agents of a different race or economic background, they would still choose to segregate themselves from other agents over time! Although the model is quite simple, it provides a fascinating look at how individuals might self-segregate, even when they have no explicit desire to do so.
+In 1971, the American economist Thomas Schelling created an agent-based model that suggested inadvertent behavior might also contribute to segregation. His model of segregation shown that even when individuals (or "agents") didn't mind being surrounded or living by agents of a different race or economic background, they would still choose to segregate themselves from other agents over time! Although the model is quite simple, it provides a fascinating look at how individuals might self-segregate, even when they have no explicit desire to do so.
 
 The problem's to create a simulation of Schelling's model by using a parallel programming approach, by exploiting distributed memory.
 
@@ -41,7 +41,7 @@ The solution follows these steps:
 
 ### The MASTER code
 
-A `partial` portion of the `MASTER` code is showed below; it emphasizes its behaviour.
+A `partial` portion of the `MASTER` code is shown below; it emphasizes its behavior.
 
 A `finished` variable, initially set to `0`, is sent to the `SLAVE` processors (_Row #6_) in order to take them awake and keep it receiving the grid's portions from the `MASTER` processor at every round. When the rounds have finished, or all the agents are satisfied, the `finished` variable will be set to `1` and sent to the `SLAVE` processors (_Row #12_) in order to sleep them down.
 
@@ -51,7 +51,7 @@ The `start_row` and `num_rows` variables are used to `send` the right rows to ev
 2. To the `SLAVE` _2_ are sent the cells _(2, 0) -> (6, 8)_ with a total of _1+3+1 = 5_ rows. <small>It requires _row 2_ to determine the right satisfaction of the agents in _row 3_, and _row 6_ to determine the right satisfaction of the agents in _row 5_</small>.
 3. To the `SLAVE` _3_ are sent the cells _(5, 0) -> (8, 8)_ with a total of _1+3 = 4_ rows. <small>It requires _row 5_ to determine the right satisfaction of the agents in _row 6_</small>.
 
-The `start_row` and `num_rows` variables used to `send` and `receive` are different; in the `receiving` part of the `MASTER` processor, it is not considered the offset row sent to the `SLAVE` processors, in order to substitute the correct cells of the `MASTER` processor grid.
+The `start_row` and `num_rows` variables used to `send` and `receive` are different; in the `receiving` part of the `MASTER` processor, it is not considered the offset rows sent to the `SLAVE` processors, in order to substitute the correct cells of the `MASTER` processor grid.
 
 ```c=
 initialize_grid(grid);
@@ -77,16 +77,19 @@ for (int i = 1; i <= workers; i++) {
 
 ### The SLAVE code
 
+A `partial` portion of the `SLAVE` code is shown below; it emphasizes its behavior.
+
+A `finished` variable is `received` from the `SLAVE` processor (_Row #1 and Row #7_) in order to take it awake and keep it receiving the grid's portions from the `MASTER` processor at every round. When the `MASTER` processor rounds have finished, or all the agents are satisfied in the `MASTER` processor grid, the `finished` variable `received` from the `SLAVE` processor will be equal to `1`, in order to sleep down the `SLAVE` processor (_exit from the `while` at Row 2_).
+
+The `num_rows` variable used to `receive` and `send` are different; in the `sending` part of the `SLAVE` processor, it is not considered the offset rows received from the `MASTER` processor in order to `send` the correct cells to the `MASTER` processor.
+
+The `optimize_agents` function (_Row 4_) is used to move the agents that are not satisfied in the `SLAVE` processor's grid.
+
 ```c=
 MPI_Recv(&(finished), 1, MPI_INT, MASTER_RANK, MESSAGE_TAG, MPI_COMM_WORLD, &status);
 while (finished == 0) {
-    num_rows = get_num_rows_of_worker(rank, workers);
-    grid = allocate_grid(num_rows, size);
-    agents = allocate_agents(num_agents);
     MPI_Recv(&(grid[0][0]), (num_rows * size), MPI_INT, MASTER_RANK, MESSAGE_TAG, MPI_COMM_WORLD, &status);
     MPI_Recv(&(agents[0]), num_agents, MPI_CHAR, MASTER_RANK, MESSAGE_TAG, MPI_COMM_WORLD, &status);
-    start_row = get_start_row_to_analyze(rank, workers);
-    num_rows = get_num_rows_to_analyze(rank, workers, num_rows);
     optimize_agents(rank, workers, grid, agents, start_row, 0, num_rows, size);
     MPI_Send(&(grid[start_row][0]), (num_rows * size), MPI_INT, MASTER_RANK, MESSAGE_TAG, MPI_COMM_WORLD);
     MPI_Recv(&(finished), 1, MPI_INT, MASTER_RANK, MESSAGE_TAG, MPI_COMM_WORLD, &status);
