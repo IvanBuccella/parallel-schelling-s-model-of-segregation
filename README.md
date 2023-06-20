@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This algorithm uses a parallel programming approach, by exploiting distributed memory, for solving Schelling's model of segregation. Its behavior allows to satisfy all the agents into the grid in less time than usual by exploiting the concurrent execution over more processors or nodes.
+This algorithm uses a parallel programming approach, by exploiting distributed memory, for simulating Schelling's model of segregation. Its behavior allows it to satisfy all the agents in the grid in less time than usual by exploiting the concurrent execution over more processors or nodes.
 
 ## The problem
 
