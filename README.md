@@ -215,7 +215,7 @@ The correctness container executes the algorithm several times, from using `2` p
 
 ## Benchmarking
 
-The benchmark tests, for weak and strong scalability, have been executed over 6 instances with 4 cores (e2-standard-4) using the [Google Cloud Plaform](https://cloud.google.com/gcp/).
+The benchmark tests, for weak and strong scalability, have been executed over 4 instances with 4 cores (e2-standard-4) using the [Google Cloud Plaform](https://cloud.google.com/gcp/).
 
 ### Strong scalability
 
@@ -240,14 +240,6 @@ Has been used a fixed grid size of `2700 x 2700`; the results are shown below.
 | 13             | X        | Xs             |
 | 14             | X        | Xs             |
 | 15             | X        | Xs             |
-| 16             | X        | Xs             |
-| 17             | X        | Xs             |
-| 18             | X        | Xs             |
-| 19             | X        | Xs             |
-| 20             | X        | Xs             |
-| 21             | X        | Xs             |
-| 22             | X        | Xs             |
-| 23             | X        | Xs             |
 
 ### Weak scalability
 
@@ -272,14 +264,6 @@ Has been used a dynamic grid size starting from `500 x 500` to `2700 x 2700`, by
 | 13             | 1700       | Xs             |
 | 14             | 1800       | Xs             |
 | 15             | 1900       | Xs             |
-| 16             | 2000       | Xs             |
-| 17             | 2100       | Xs             |
-| 18             | 2200       | Xs             |
-| 19             | 2300       | Xs             |
-| 20             | 2400       | Xs             |
-| 21             | 2500       | Xs             |
-| 22             | 2600       | Xs             |
-| 23             | 2700       | Xs             |
 
 ## Conclusions
 

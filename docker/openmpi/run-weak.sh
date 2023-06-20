@@ -8,7 +8,7 @@ echo "End compiling"
 size=500
 
 echo -e "\n------------------Starting the test------------------"
-for i in {2..24}
+for i in {2..16}
 do
   echo -e "\n\nRun with $i processors"
   echo $size

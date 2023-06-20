@@ -16,7 +16,7 @@ fi
 
 echo -e "\n\nRun with 2 processors"
 mpirun -np 2 --allow-run-as-root ./main.out >> two-processors.txt
-for i in {3..24}
+for i in {3..16}
 do
   echo -e "\n\nRun with $i processors"
   mpirun -np $i --allow-run-as-root ./main.out >> x-processors.txt
