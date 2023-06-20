@@ -53,7 +53,7 @@ The `start_row` and `num_rows` variables are used to `send` the right rows to ev
 
 The `start_row` and `num_rows` variables used to `send` and `receive` are different; in the `receiving` part of the `MASTER` processor, it is not considered the offset rows sent to the `SLAVE` processors, in order to substitute the correct cells of the `MASTER` processor grid.
 
-```c=
+```c
 initialize_grid(grid);
 initialize_agents(grid, agents);
 
@@ -85,7 +85,7 @@ The `num_rows` variable used to `receive` and `send` are different; in the `send
 
 The `optimize_agents` function (_Row 4_) is used to move the agents that are not satisfied in the `SLAVE` processor's grid.
 
-```c=
+```c
 MPI_Recv(&(finished), 1, MPI_INT, MASTER_RANK, MESSAGE_TAG, MPI_COMM_WORLD, &status);
 while (finished == 0) {
     MPI_Recv(&(grid[0][0]), (num_rows * size), MPI_INT, MASTER_RANK, MESSAGE_TAG, MPI_COMM_WORLD, &status);
@@ -104,7 +104,7 @@ The function iterates all the rows and cols of the `SLAVE` processor's grid wher
 
 At every iteration, the function decides to randomly move an agent to another location of the `SLAVE` processor's grid (_not including the offset rows_) if the agent located in the cell `[i + start_row][j + start_column]` is not satisfied.
 
-```c=
+```c
 void optimize_agents(int rank, int workers, int **grid, char *agents, int start_row, int start_column, int num_rows, int num_cols) {
     if (!has_free_cells(grid, start_row, start_column, num_rows, num_cols)) {
         return;
@@ -128,7 +128,7 @@ The `is_satisfied` function code is shown below; it receives in input a grid inc
 
 The function `explores the neighborhood` of the cell received in input, considering the size of the grid (_Row 7 and Row 11_), and determines, considering the threshold `t` percent, if the cell received in input is satisfied (_Row 22_).
 
-```c=
+```c
 bool is_satisfied(int **grid, char *agents, int start_row, int start_column, int total_num_rows, int total_num_cols, int x, int y) {
     if (grid[x][y] == -1) {
         return true;
@@ -219,7 +219,7 @@ The benchmark tests, for weak and strong scalability, have been executed over 6 
 
 ### Strong scalability
 
-Has been used a fixed grid size of `2700 x 2700`; the results are presented below.
+Has been used a fixed grid size of `2700 x 2700`; the results are shown below.
 
 <small>Data reported are the average of three runs for every processor number change.</small>
 
@@ -251,7 +251,7 @@ Has been used a fixed grid size of `2700 x 2700`; the results are presented belo
 
 ### Weak scalability
 
-Has been used a dynamic grid size starting from `500 x 500` to `2700 x 2700`, by augmenting the grid size of `100 x 100` for every new processor added; the results are presented below.
+Has been used a dynamic grid size starting from `500 x 500` to `2700 x 2700`, by augmenting the grid size of `100 x 100` for every new processor added; the results are shown below.
 
 <small>Data reported are the average of three runs for every processor number change.</small>
 
