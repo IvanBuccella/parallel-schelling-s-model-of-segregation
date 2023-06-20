@@ -124,6 +124,10 @@ void optimize_agents(int rank, int workers, int **grid, char *agents, int start_
 
 ### The `is_satisfied` function
 
+The `is_satisfied` function code is shown below; it receives in input a grid including its own size and the coordinates `(x,y)` of the cell to check.
+
+The function `explores the neighborhood` of the cell received in input, considering the size of the grid (_Row 7 and Row 11_), and determines, considering the threshold `t` percent, if the cell received in input is satisfied (_Row 22_).
+
 ```c=
 bool is_satisfied(int **grid, char *agents, int start_row, int start_column, int total_num_rows, int total_num_cols, int x, int y) {
     if (grid[x][y] == -1) {
