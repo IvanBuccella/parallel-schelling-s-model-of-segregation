@@ -16,12 +16,13 @@ fi
 
 echo -e "\n\nRun with 2 processors"
 mpirun -np 2 --allow-run-as-root ./main.out >> two-processors.txt
-for i in {3..10}
+for i in {3..24}
 do
   echo -e "\n\nRun with $i processors"
   mpirun -np $i --allow-run-as-root ./main.out >> x-processors.txt
   if ! cmp -s two-processors.txt x-processors.txt; then
     echo -e "Differences found."
+    exit 1
   else
     echo -e "No differences found."
   fi
