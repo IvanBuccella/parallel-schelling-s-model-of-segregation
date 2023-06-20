@@ -6,6 +6,37 @@ This algorithm uses a parallel programming approach, by exploiting distributed m
 
 ## The problem
 
+In 1971, the American economist Thomas Schelling created an agent-based model that suggested inadvertent behavior might also contribute to segregation. His model of segregation showed that even when individuals (or "agents") didn't mind being surrounded or living by agents of a different race or economic background, they would still choose to segregate themselves from other agents over time! Although the model is quite simple, it provides a fascinating look at how individuals might self-segregate, even when they have no explicit desire to do so.
+
+The problem's to create a simulation of Schelling's model by using a parallel programming approach, by exploiting distributed memory.
+
+### Definitions
+
+There are two types of agents: (`B`)lue and (`R`)ed; and a cell can be populated or can be (`E`)mpty.
+
+A `satisfied agent` is one that is surrounded by at least threshold `t` percent (30%) of agents that are like itself.
+
+An `unsatisfied agent` is randomly moved `only` on a vacant location in the grid `owned by the corresponding processor`. This means if the grid `size`x`size` is divided by rows between 4 processors, when the agent in the cell [0,0] can be moved only in an empty cell in the first `size/4` rows.
+
+The simulation is performed until `all agents are satisfied` or a maximum number of rounds `max_rounds` is reached.
+
+The agents are initially placed into random locations of a neighborhood represented by a grid by assigning to the agent `x` the value = `{ B | (x % 2) == 0} ∪ { G | (x % 2) == 1}`.
+
+The `MASTER` is the processor with the rank `0` and a generic `SLAVE x` has the rank = `{ p | p > 0 and p <= workers }` where `workers = P - 1` and `P` is the number of processors exploited.
+
+### The solution
+
+The solution follows this steps:
+
+1.  The `MASTER` processor allocates the grid and place all the agents by using the `initialize_grid` and `initialize_agents` functions.
+2.  Until the max_rounds number is `NOT` reached `OR` all agents are `NOT` satisfied:
+
+    1. The `MASTER` processor splits the grid rows over the `SLAVE` processors and `send` the corresponding portion to them. <small>The grid is split by assigning `(size/workers)` rows to every `SLAVE` (except for the remaining rows that are assigned to the last `SLAVE` if the `size` is not divisible for `workers`)</small>
+    2. The `SLAVE` processor `receive` its protion of the matrix and move the unsatisfied agents by using the `optimize_agents` function. Then it `send` back to the `MASTER` processor its modified matrix.
+    3. The `MASTER` processor `receive` from all the `SLAVE` processors their portions and update the matrix.
+
+3.  The `MASTER` prints out the result of the simulation.
+
 ## Implementation details
 
 ## Execution Tutorial
@@ -133,3 +164,13 @@ Has been used a dynamic matrix size starting from `500 x 500` to `2700 x 2700`, 
 | 23             | 2700       | Xs             |
 
 ## Conclusions
+
+## Contributing
+
+This project welcomes contributions and suggestions. If you use this code, please cite this repository.
+
+## Citation
+
+Credit to [Carmine Spagnuolo](https://spagnuolocarmine.github.io/): [Schelling's model of segregation](https://spagnuolocarmine.notion.site/3-Schelling-s-model-of-segregation-272acd31bdcc45689abeb18593ed0dda) & [Ubuntu with OpenMPI and OpenMP](https://github.com/spagnuolocarmine/ubuntu-openmpi-openmp) & [docker-mpi ](https://github.com/spagnuolocarmine/docker-mpi).
+
+Credit to Frank McCown: [Schelling's Model of Segregation](http://nifty.stanford.edu/2014/mccown-schelling-model-segregation/)
