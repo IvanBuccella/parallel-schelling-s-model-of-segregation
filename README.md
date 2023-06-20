@@ -47,9 +47,9 @@ A `finished` variable, initially set to `0`, is sent to the `SLAVE` processors (
 
 The `start_row` and `num_rows` variables are used to `send` the right rows to every `SLAVE` processor in order to give it the required data to determine agent satisfaction. This means if there are _3_ `SLAVE` processors and the `size` of the grid is _9x9_, the grid will be sent as follow:
 
-1. To the `SLAVE` _1_ are sent the cells _(0, 0) -> (3, 8)_ with a total of _3+1 = 4_ rows. <small>It requires row _3_ to determine the right satisfaction of the agents in row _2_</small>.
-2. To the `SLAVE` _2_ are sent the cells _(2, 0) -> (6, 8)_ with a total of _1+3+1 = 5_ rows. <small>It requires row _2_ to determine the right satisfaction of the agents in row _3_, and row _6_ to determine the right satisfaction of the agents in row _5_</small>.
-3. To the `SLAVE` _3_ are sent the cells _(5, 0) -> (8, 8)_ with a total of _1+3 = 4_ rows. <small>It requires row _5_ to determine the right satisfaction of the agents in row _6_</small>.
+1. To the `SLAVE` _1_ are sent the cells _(0, 0) -> (3, 8)_ with a total of _3+1 = 4_ rows. <small>It requires _row 3_ to determine the right satisfaction of the agents in _row 2_</small>.
+2. To the `SLAVE` _2_ are sent the cells _(2, 0) -> (6, 8)_ with a total of _1+3+1 = 5_ rows. <small>It requires _row 2_ to determine the right satisfaction of the agents in _row 3_, and _row 6_ to determine the right satisfaction of the agents in _row 5_</small>.
+3. To the `SLAVE` _3_ are sent the cells _(5, 0) -> (8, 8)_ with a total of _1+3 = 4_ rows. <small>It requires _row 5_ to determine the right satisfaction of the agents in _row 6_</small>.
 
 The `start_row` and `num_rows` variables used to `send` and `receive` are different; in the `receiving` part of the `MASTER` processor, it is not considered the offset row sent to the `SLAVE` processors, in order to substitute the correct cells of the `MASTER` processor grid.
 
