@@ -223,23 +223,23 @@ Has been used a fixed grid size of `2700 x 2700`; the results are shown below.
 
 <small>Data reported are the average of three runs for every processor number change.</small>
 
-| Workers number | Speed-up | Execution time |
-| -------------- | -------- | -------------- |
-| 1              | X        | Xs             |
-| 2              | X        | Xs             |
-| 3              | X        | Xs             |
-| 4              | X        | Xs             |
-| 5              | X        | Xs             |
-| 6              | X        | Xs             |
-| 7              | X        | Xs             |
-| 8              | X        | Xs             |
-| 9              | X        | Xs             |
-| 10             | X        | Xs             |
-| 11             | X        | Xs             |
-| 12             | X        | Xs             |
-| 13             | X        | Xs             |
-| 14             | X        | Xs             |
-| 15             | X        | Xs             |
+| `SLAVE`s number | Speed-up | Execution time |
+| --------------- | -------- | -------------- |
+| 1               | X        | Xs             |
+| 2               | X        | Xs             |
+| 3               | X        | Xs             |
+| 4               | X        | Xs             |
+| 5               | X        | Xs             |
+| 6               | X        | Xs             |
+| 7               | X        | Xs             |
+| 8               | X        | Xs             |
+| 9               | X        | Xs             |
+| 10              | X        | Xs             |
+| 11              | X        | Xs             |
+| 12              | X        | Xs             |
+| 13              | X        | Xs             |
+| 14              | X        | Xs             |
+| 15              | X        | Xs             |
 
 ### Weak scalability
 
@@ -247,23 +247,23 @@ Has been used a dynamic grid size starting from `500 x 500` to `2700 x 2700`, by
 
 <small>Data reported are the average of three runs for every processor number change.</small>
 
-| Workers number | Input size | Execution time |
-| -------------- | ---------- | -------------- |
-| 1              | 500        | Xs             |
-| 2              | 600        | Xs             |
-| 3              | 700        | Xs             |
-| 4              | 800        | Xs             |
-| 5              | 900        | Xs             |
-| 6              | 1000       | Xs             |
-| 7              | 1100       | Xs             |
-| 8              | 1200       | Xs             |
-| 9              | 1300       | Xs             |
-| 10             | 1400       | Xs             |
-| 11             | 1500       | Xs             |
-| 12             | 1600       | Xs             |
-| 13             | 1700       | Xs             |
-| 14             | 1800       | Xs             |
-| 15             | 1900       | Xs             |
+| `SLAVE`s number | Input size | Execution time |
+| --------------- | ---------- | -------------- |
+| 1               | 500        | Xs             |
+| 2               | 600        | Xs             |
+| 3               | 700        | Xs             |
+| 4               | 800        | Xs             |
+| 5               | 900        | Xs             |
+| 6               | 1000       | Xs             |
+| 7               | 1100       | Xs             |
+| 8               | 1200       | Xs             |
+| 9               | 1300       | Xs             |
+| 10              | 1400       | Xs             |
+| 11              | 1500       | Xs             |
+| 12              | 1600       | Xs             |
+| 13              | 1700       | Xs             |
+| 14              | 1800       | Xs             |
+| 15              | 1900       | Xs             |
 
 ## Conclusions
 
