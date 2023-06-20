@@ -16,7 +16,7 @@ There are two types of agents: (`B`)lue and (`R`)ed; and a cell can be populated
 
 A `satisfied agent` is one that is surrounded by at least threshold `t` percent (30%) of agents that are like itself.
 
-An `unsatisfied agent` is randomly moved `only` on a vacant location in the grid `owned by the corresponding processor`. This means if the grid `size`x`size` is divided by rows between 4 processors, when the agent in the cell [0,0] can be moved only in an empty cell in the first `size/4` rows.
+An `unsatisfied agent` is randomly moved `only` on a vacant location in the grid `owned by the corresponding processor`. This means if the grid `size`x`size` is divided by rows between _4_ processors, when the agent in the cell _(0,0)_ can be moved only in an empty cell in the first _`size`/4_ rows.
 
 The simulation is performed until `all agents are satisfied` or a maximum number of rounds `max_rounds` is reached.
 
@@ -32,12 +32,117 @@ The solution follows these steps:
 2.  Until the max_rounds number is `NOT` reached `OR` all agents are `NOT` satisfied:
 
     1. The `MASTER` processor splits the grid rows over the `SLAVE` processors and `send` the corresponding portion to them. <small>The grid is split by assigning `(size/workers)` rows to every `SLAVE` (except for the remaining rows that are assigned to the last `SLAVE` if the `size` is not divisible for `workers`)</small>.
-    2. The `SLAVE` processor `receive` its protion of the matrix and move the unsatisfied agents by using the `optimize_agents` function. Then it `send` back to the `MASTER` processor its modified matrix.
-    3. The `MASTER` processor `receives` from all the `SLAVE` processors their portions and updates its own matrix.
+    2. The `SLAVE` processor `receive` its protion of the grid and move the unsatisfied agents by using the `optimize_agents` function. Then it `send` back to the `MASTER` processor its modified grid.
+    3. The `MASTER` processor `receives` from all the `SLAVE` processors their portions and updates its own grid.
 
 3.  The `MASTER` prints out the result of the simulation.
 
 ## Implementation details
+
+### The MASTER code
+
+A `partial` portion of the `MASTER` code is showed below; it emphasizes its behaviour.
+
+A `finished` variable, initially set to `0`, is sent to the `SLAVE` processors (_Row #6_) in order to take them awake and keep it receiving the grid's portions from the `MASTER` processor at every round. When the rounds have finished, or all the agents are satisfied, the `finished` variable will be set to `1` and sent to the `SLAVE` processors (_Row #12_) in order to sleep them down.
+
+The `start_row` and `num_rows` variables are used to `send` the right rows to every `SLAVE` processor in order to give it the required data to determine agent satisfaction. This means if there are _3_ `SLAVE` processors and the `size` of the grid is _9x9_, the grid will be sent as follow:
+
+1. To the `SLAVE` _1_ are sent the cells _(0, 0) -> (3, 8)_ with a total of _3+1 = 4_ rows. <small>It requires row _3_ to determine the right satisfaction of the agents in row _2_</small>.
+2. To the `SLAVE` _2_ are sent the cells _(2, 0) -> (6, 8)_ with a total of _1+3+1 = 5_ rows. <small>It requires row _2_ to determine the right satisfaction of the agents in row _3_, and row _6_ to determine the right satisfaction of the agents in row _5_</small>.
+3. To the `SLAVE` _3_ are sent the cells _(5, 0) -> (8, 8)_ with a total of _1+3 = 4_ rows. <small>It requires row _5_ to determine the right satisfaction of the agents in row _6_</small>.
+
+The `start_row` and `num_rows` variables used to `send` and `receive` are different; in the `receiving` part of the `MASTER` processor, it is not considered the offset row sent to the `SLAVE` processors, in order to substitute the correct cells of the `MASTER` processor grid.
+
+```c=
+initialize_grid(grid);
+initialize_agents(grid, agents);
+
+for (int round = 0; round < max_rounds && !all_satisfied; round++) {
+    for (int i = 1; i <= workers; i++) {
+        MPI_Isend(&(finished), 1, MPI_INT, i, MESSAGE_TAG, MPI_COMM_WORLD, &(requests[i - 1]));
+        MPI_Isend(&(grid[start_row][0]), (num_rows * size), MPI_INT, i, MESSAGE_TAG, MPI_COMM_WORLD, &(requests[i - 1]));
+        MPI_Isend(&(agents[0]), num_agents, MPI_CHAR, i, MESSAGE_TAG, MPI_COMM_WORLD, &(requests[i - 1]));
+    }
+    MPI_Waitall(workers, requests, MPI_STATUSES_IGNORE);
+    for (int i = 1; i <= workers; i++) {
+        MPI_Recv(&(grid[start_row][0]), (num_rows * size), MPI_INT, i, MESSAGE_TAG, MPI_COMM_WORLD, &status);
+    }
+    all_satisfied = all_agents_are_satisfied(grid, agents, size, size);
+}
+
+for (int i = 1; i <= workers; i++) {
+    MPI_Isend(&(finished), 1, MPI_INT, i, MESSAGE_TAG, MPI_COMM_WORLD, &(requests[i - 1]));
+}
+```
+
+### The SLAVE code
+
+```c=
+MPI_Recv(&(finished), 1, MPI_INT, MASTER_RANK, MESSAGE_TAG, MPI_COMM_WORLD, &status);
+while (finished == 0) {
+    num_rows = get_num_rows_of_worker(rank, workers);
+    grid = allocate_grid(num_rows, size);
+    agents = allocate_agents(num_agents);
+    MPI_Recv(&(grid[0][0]), (num_rows * size), MPI_INT, MASTER_RANK, MESSAGE_TAG, MPI_COMM_WORLD, &status);
+    MPI_Recv(&(agents[0]), num_agents, MPI_CHAR, MASTER_RANK, MESSAGE_TAG, MPI_COMM_WORLD, &status);
+    start_row = get_start_row_to_analyze(rank, workers);
+    num_rows = get_num_rows_to_analyze(rank, workers, num_rows);
+    optimize_agents(rank, workers, grid, agents, start_row, 0, num_rows, size);
+    MPI_Send(&(grid[start_row][0]), (num_rows * size), MPI_INT, MASTER_RANK, MESSAGE_TAG, MPI_COMM_WORLD);
+    MPI_Recv(&(finished), 1, MPI_INT, MASTER_RANK, MESSAGE_TAG, MPI_COMM_WORLD, &status);
+}
+```
+
+### The `optimize_agents` function
+
+```c=
+void optimize_agents(int rank, int workers, int **grid, char *agents, int start_row, int start_column, int num_rows, int num_cols) {
+    if (!has_free_cells(grid, start_row, start_column, num_rows, num_cols)) {
+        return;
+    }
+    for (int i = 0; i < num_rows; i++) {
+        for (int j = 0; j < num_cols; j++) {
+            if (grid[i + start_row][j + start_column] == -1) {
+                continue;
+            }
+            if (!is_satisfied(grid, agents, start_row, start_column, get_num_rows_of_worker(rank, workers), num_cols, i + start_row, j + start_column)) {
+                move_agent(grid, start_row, start_column, num_rows, num_cols, i + start_row, j + start_column);
+            }
+        }
+    }
+}
+```
+
+### The `is_satisfied` function
+
+```c=
+bool is_satisfied(int **grid, char *agents, int start_row, int start_column, int total_num_rows, int total_num_cols, int x, int y) {
+    if (grid[x][y] == -1) {
+        return true;
+    }
+    int i, j, neighbors = 1, siblings = 0;
+    for (i = x - 1; i <= x + 1; i++) {
+        if (i < 0 || i > total_num_rows - 1) {
+            continue;
+        }
+        for (j = y - 1; j <= y + 1; j++) {
+            if (j < 0 || j > total_num_cols - 1 || (i == x && j == y)) {
+                continue;
+            }
+            if (agents[grid[x][y]] == agents[grid[i][j]]) {
+                siblings++;
+            }
+            if (grid[i][j] != -1) {
+                neighbors++;
+            }
+        }
+    }
+    if ((siblings * 100) / neighbors >= t) {
+        return true;
+    }
+    return false;
+}
+```
 
 ## Execution Tutorial
 
@@ -101,7 +206,7 @@ The benchmark tests, for weak and strong scalability, have been executed over 6 
 
 ### Strong scalability
 
-Has been used a fixed matrix size of `2700 x 2700`; the results are presented below.
+Has been used a fixed grid size of `2700 x 2700`; the results are presented below.
 
 <small>Data reported are the average of three runs for every processor number change.</small>
 
@@ -133,7 +238,7 @@ Has been used a fixed matrix size of `2700 x 2700`; the results are presented be
 
 ### Weak scalability
 
-Has been used a dynamic matrix size starting from `500 x 500` to `2700 x 2700`, by augmenting the matrix size of `100 x 100` for every new processor added; the results are presented below.
+Has been used a dynamic grid size starting from `500 x 500` to `2700 x 2700`, by augmenting the grid size of `100 x 100` for every new processor added; the results are presented below.
 
 <small>Data reported are the average of three runs for every processor number change.</small>
 
