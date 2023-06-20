@@ -4,7 +4,7 @@
 #include "mpi.h"
 #include "string.h"
 
-#define size 2000                                             // The grid size - remember that the maximum integer value is 2147483647
+#define default_size 2000                                     // The default grid size - remember that the maximum integer value is 2147483647
 #define empty_perc 30                                         // The percentage threshold of empty cells
 #define t 30                                                  // The percentage threshold of agent satisfaction
 #define max_rounds 50                                         // The max steps number for satisfing the agents
@@ -15,6 +15,8 @@
 #define CHAR_BLUE 'B'
 #define CHAR_RED 'R'
 #define CHAR_EMPTY '-'
+
+int size = default_size;
 
 int **allocate_grid(int rows, int cols);
 char *allocate_agents(int number);
@@ -44,6 +46,11 @@ int main(int argc, char *argv[])
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     workers = processors - 1;
     bool all_satisfied = false;
+
+    if (argc > 1)
+    {
+        size = atoi(argv[1]);
+    }
 
     dt_start = MPI_Wtime();
     if (size < workers || processors < 2) // if less than 3 processors, or I cannot split the grid between the workers, skip

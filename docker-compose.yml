@@ -1,6 +1,6 @@
 version: "3.7"
 services:
-  runner:
+  runner-strong:
     platform: "linux/amd64"
     build:
       context: ./docker/openmpi
@@ -8,7 +8,16 @@ services:
     volumes:
       - "./src:/app"
     command: >
-      sh -c "chmod +x run.sh && ./run.sh"
+      sh -c "chmod +x run-strong.sh && ./run-strong.sh"
+  runner-weak:
+    platform: "linux/amd64"
+    build:
+      context: ./docker/openmpi
+      dockerfile: Dockerfile.dev
+    volumes:
+      - "./src:/app"
+    command: >
+      sh -c "chmod +x run-weak.sh && ./run-weak.sh"
   correctness:
     platform: "linux/amd64"
     build:
