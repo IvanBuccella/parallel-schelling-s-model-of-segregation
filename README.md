@@ -31,9 +31,9 @@ The solution follows these steps:
 1.  The `MASTER` processor allocates the grid and place all the agents by using the `initialize_grid` and `initialize_agents` functions.
 2.  Until the max_rounds number is `NOT` reached `OR` all agents are `NOT` satisfied:
 
-    1. The `MASTER` processor splits the grid rows over the `SLAVE` processors and `send` the corresponding portion to them. <small>The grid is split by assigning `(size/workers)` rows to every `SLAVE` (except for the remaining rows that are assigned to the last `SLAVE` if the `size` is not divisible for `workers`)</small>.
-    2. The `SLAVE` processor `receive` its protion of the grid and move the unsatisfied agents by using the `optimize_agents` function. Then it `send` back to the `MASTER` processor its modified grid.
-    3. The `MASTER` processor `receives` from all the `SLAVE` processors their portions and updates its own grid.
+    1. The `MASTER` processor splits the grid rows over the `SLAVE` processors and `send`, by using the `MPI_Isend` routine, the corresponding portion to them. <small>The grid is split by assigning `(size/workers)` rows to every `SLAVE` (except for the remaining rows that are assigned to the last `SLAVE` if the `size` is not divisible for `workers`)</small>.
+    2. The `SLAVE` processor `receive`, by using the `MPI_Recv` routine, its protion of the grid and move the unsatisfied agents by using the `optimize_agents` function. Then it `send` back to the `MASTER` processor its modified grid.
+    3. The `MASTER` processor `receives`, by using the `MPI_Recv` routine, from all the `SLAVE` processors their portions and updates its own grid.
 
 3.  The `MASTER` prints out the result of the simulation.
 
