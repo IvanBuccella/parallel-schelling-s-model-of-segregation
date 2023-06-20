@@ -102,7 +102,7 @@ The `optimize_agents` function code, used in every `SLAVE` processor, is shown b
 
 The function iterates all the rows and cols of the `SLAVE` processor's grid where the agents have to be satisfied (_so, not including the offset rows_), and uses the offset rows received from the `MASTER` processor for verifying (_using the `is_satisfied` function_) the satisfaction on an agent.
 
-At every iteration, the function decides to randomly move an agent to another location of the `SLAVE` processor's grid (_not including the offset rows_) if the agent located in the cell `[i + start_row][j + start_column]` is not satisfied.
+At every iteration, the function decides to randomly move an agent to another location of the `SLAVE` processor's grid (_not including the offset rows_) if the agent located in the cell `(i + start_row, j + start_column)` is not satisfied.
 
 ```c
 void optimize_agents(int rank, int workers, int **grid, char *agents, int start_row, int start_column, int num_rows, int num_cols) {
