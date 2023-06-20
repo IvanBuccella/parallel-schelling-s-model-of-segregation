@@ -14,7 +14,7 @@
 
 #define CHAR_BLUE 'B'
 #define CHAR_RED 'R'
-#define CHAR_EMPTY '-'
+#define CHAR_EMPTY 'E'
 
 int size = default_size;
 
