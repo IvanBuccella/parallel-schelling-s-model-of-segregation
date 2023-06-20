@@ -273,6 +273,6 @@ This project welcomes contributions and suggestions. If you use this code, pleas
 
 ## Citation
 
-Credit to [Carmine Spagnuolo](https://spagnuolocarmine.github.io/): [Schelling's model of segregation](https://spagnuolocarmine.notion.site/3-Schelling-s-model-of-segregation-272acd31bdcc45689abeb18593ed0dda) & [Ubuntu with OpenMPI and OpenMP](https://github.com/spagnuolocarmine/ubuntu-openmpi-openmp) & [docker-mpi ](https://github.com/spagnuolocarmine/docker-mpi).
+Credit to [Carmine Spagnuolo](https://spagnuolocarmine.github.io/): [Schelling's model of segregation](https://spagnuolocarmine.notion.site/3-Schelling-s-model-of-segregation-272acd31bdcc45689abeb18593ed0dda) & [Ubuntu with OpenMPI and OpenMP](https://github.com/spagnuolocarmine/ubuntu-openmpi-openmp) & [Docker image Ubuntu 18.04 OpenMPI](https://github.com/spagnuolocarmine/docker-mpi).
 
 Credit to Frank McCown: [Schelling's Model of Segregation](http://nifty.stanford.edu/2014/mccown-schelling-model-segregation/)
