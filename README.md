@@ -241,7 +241,7 @@ Has been used a fixed grid size of `1900 x 1900`; the results are shown below.
 | 14              | 1.03              | 3.40              | 3.760451       |
 | 15              | 0.91              | 3.11              | 4.104836       |
 
-<img src="assets/strong-scalability.png" alt="Strong Scalability" style="margin-top: 10px; max-height: 200px;">
+<img src="assets/strong-scalability.png" alt="Strong Scalability" style="margin-top: 10px; max-height: 300px;">
 
 ### Weak scalability
 
@@ -267,7 +267,7 @@ Has been used a dynamic grid size starting from `500 x 500` to `1900 x 1900`, by
 | 14              | 1800       | 3.254211       |
 | 15              | 1900       | 4.111134       |
 
-<img src="assets/weak-scalability.png" alt="Weak Scalability" style="margin-top: 10px; max-height: 200px;">
+<img src="assets/weak-scalability.png" alt="Weak Scalability" style="margin-top: 10px; max-height: 300px;">
 
 ## Conclusions
 
