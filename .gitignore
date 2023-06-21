@@ -5,3 +5,7 @@
 .python-version
 src/*.txt
 src/*.out
+pcpc_gcloud_key
+pcpc_gcloud_key.pub
+hostfile
+ssh-commands.txt
