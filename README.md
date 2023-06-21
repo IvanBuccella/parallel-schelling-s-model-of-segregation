@@ -241,6 +241,8 @@ Has been used a fixed grid size of `1900 x 1900`; the results are shown below.
 | 14              | 1.03              | 3.40              | 3.760451       |
 | 15              | 0.91              | 3.11              | 4.104836       |
 
+<img src="assets/strong-scalability.png" alt="Strong Scalability" style="margin-top: 10px; max-height: 200px;">
+
 ### Weak scalability
 
 Has been used a dynamic grid size starting from `500 x 500` to `1900 x 1900`, by augmenting the grid size of `100 x 100` for every new processor added; the results are shown below.
@@ -264,6 +266,8 @@ Has been used a dynamic grid size starting from `500 x 500` to `1900 x 1900`, by
 | 13              | 1700       | 2.522752       |
 | 14              | 1800       | 3.254211       |
 | 15              | 1900       | 4.111134       |
+
+<img src="assets/weak-scalability.png" alt="Weak Scalability" style="margin-top: 10px; max-height: 200px;">
 
 ## Conclusions
 
