@@ -219,51 +219,51 @@ The benchmark tests, for weak and strong scalability, have been executed over 4 
 
 ### Strong scalability
 
-Has been used a fixed grid size of `2700 x 2700`; the results are shown below.
+Has been used a fixed grid size of `1900 x 1900`; the results are shown below.
 
 <small>Data reported are the average of three runs for every processor number change.</small>
 
-| `SLAVE`s number | Speed-up | Execution time |
-| --------------- | -------- | -------------- |
-| 1               | X        | Xs             |
-| 2               | X        | Xs             |
-| 3               | X        | Xs             |
-| 4               | X        | Xs             |
-| 5               | X        | Xs             |
-| 6               | X        | Xs             |
-| 7               | X        | Xs             |
-| 8               | X        | Xs             |
-| 9               | X        | Xs             |
-| 10              | X        | Xs             |
-| 11              | X        | Xs             |
-| 12              | X        | Xs             |
-| 13              | X        | Xs             |
-| 14              | X        | Xs             |
-| 15              | X        | Xs             |
+| `SLAVE`s number | Relative Speed-up | Absolute Speed-up | Execution time |
+| --------------- | ----------------- | ----------------- | -------------- |
+| 1               | 1.0               | 1.0               | 12.787611      |
+| 2               | X                 | X                 | 7.144124       |
+| 3               | X                 | X                 | 5.210431       |
+| 4               | X                 | X                 | 5.722139       |
+| 5               | X                 | X                 | 4.183748       |
+| 6               | X                 | X                 | 7.215958       |
+| 7               | X                 | X                 | 4.416550       |
+| 8               | X                 | X                 | 4.557257       |
+| 9               | X                 | X                 | 5.524770       |
+| 10              | X                 | X                 | 5.213230       |
+| 11              | X                 | X                 | 3.557619       |
+| 12              | X                 | X                 | 3.812692       |
+| 13              | X                 | X                 | 3.873288       |
+| 14              | X                 | X                 | 3.760451       |
+| 15              | X                 | X                 | 4.104836       |
 
 ### Weak scalability
 
-Has been used a dynamic grid size starting from `500 x 500` to `2700 x 2700`, by augmenting the grid size of `100 x 100` for every new processor added; the results are shown below.
+Has been used a dynamic grid size starting from `500 x 500` to `1900 x 1900`, by augmenting the grid size of `100 x 100` for every new processor added; the results are shown below.
 
 <small>Data reported are the average of three runs for every processor number change.</small>
 
 | `SLAVE`s number | Input size | Execution time |
 | --------------- | ---------- | -------------- |
-| 1               | 500        | Xs             |
-| 2               | 600        | Xs             |
-| 3               | 700        | Xs             |
-| 4               | 800        | Xs             |
-| 5               | 900        | Xs             |
-| 6               | 1000       | Xs             |
-| 7               | 1100       | Xs             |
-| 8               | 1200       | Xs             |
-| 9               | 1300       | Xs             |
-| 10              | 1400       | Xs             |
-| 11              | 1500       | Xs             |
-| 12              | 1600       | Xs             |
-| 13              | 1700       | Xs             |
-| 14              | 1800       | Xs             |
-| 15              | 1900       | Xs             |
+| 1               | 500        | 0.443342       |
+| 2               | 600        | 0.706686       |
+| 3               | 700        | 0.694799       |
+| 4               | 800        | 0.715274       |
+| 5               | 900        | 0.990585       |
+| 6               | 1000       | 1.163156       |
+| 7               | 1100       | 1.122615       |
+| 8               | 1200       | 1.203246       |
+| 9               | 1300       | 1.440916       |
+| 10              | 1400       | 2.653205       |
+| 11              | 1500       | 2.998650       |
+| 12              | 1600       | 2.393963       |
+| 13              | 1700       | 2.522752       |
+| 14              | 1800       | 3.254211       |
+| 15              | 1900       | 4.111134       |
 
 ## Conclusions
 
