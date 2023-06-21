@@ -267,6 +267,12 @@ Has been used a dynamic grid size starting from `500 x 500` to `1900 x 1900`, by
 
 ## Conclusions
 
+The analysis of the `strong scalability` graph shows an improvement in execution times as more processors are used. However, performance stabilizes by reaching the peak at `11` `SLAVE` processors and then tends to degrade. This is due to the increase in the power of computation and to the smallest grid subdivision with the communication overhead between the processors reducing overall performance.
+
+The analysis of the `weak scalability` graph shows that the execution time tends to augment with the augmentation of the number of processors and the input size per processor. This suggests an equal split of the workload between processors when the input size can be equally split among the processors.
+
+In conclusion, the calculated accelerations show a sometimes negative and sometimes positive influence on the number of processors used; as the size of the grid and the number of processors do not always allow the grid to be equally divided among them causing a not-always-equal workload between processors. Another point to analyze is the `MASTER` doesn't optimize the agents on any portion of the grid in the current implementation; the code may be modified in order to keep the `MASTER` some work to do itself during waiting for the other portions of the grid from the `SLAVE` processors, in order to improve the performance.
+
 ## Contributing
 
 This project welcomes contributions and suggestions. If you use this code, please cite this repository.
