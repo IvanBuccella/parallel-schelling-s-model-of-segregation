@@ -1,5 +1,2 @@
 FROM spagnuolocarmine/docker-mpi:latest
-WORKDIR /
-COPY ./run-strong.sh ./run-strong.sh
-COPY ./run-weak.sh ./run-weak.sh
-COPY ./correctness.sh ./correctness.sh
+WORKDIR /app
